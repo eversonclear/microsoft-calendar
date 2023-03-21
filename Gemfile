@@ -8,6 +8,10 @@ gem "rails", "~> 7.0.3", ">= 7.0.3.1"
 
 gem "devise"
 
+gem 'microsoft_graph', '~> 0.1.3'
+
+gem "sidekiq"
+
 gem "jwt"
 
 gem 'dotenv-rails'

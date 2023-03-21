@@ -12,6 +12,10 @@ class MicrosoftService
     (res.is_a? Net::HTTPSuccess) ? JSON.parse(res.body) : raise(JSON.parse(res.body)['error']['message'])
   end
 
+  def access_token_is_valid?(date_expire)
+    (date_expire - 5.minutes) > Time.now
+  end
+  
   def refresh_token(azure_refresh_token, origin)
     uri = URI.parse('https://login.microsoftonline.com/common/oauth2/v2.0/token')
 
@@ -22,6 +26,7 @@ class MicrosoftService
     headers = { content_type: 'application/x-www-form-urlencoded', origin: origin }
     res = http_client.request_post(uri.to_s, encoded_form, headers)
 
+    puts res.body.as_json
     (res.is_a? Net::HTTPSuccess) ? JSON.parse(res.body) : raise(JSON.parse(res.body)['error']['message'])
   end
 
