@@ -26,7 +26,7 @@ class CreateEvents < ActiveRecord::Migration[7.0]
       t.string :status
       t.string :summary
       t.string :transparency
-      t.string :recurrences
+      t.text :recurrence
 
       t.timestamps
     end

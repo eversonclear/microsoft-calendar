@@ -4,8 +4,10 @@ require 'net/http'
 class UpdateCalendarsEventsJob
   include Sidekiq::Job
 
-  def perform(current_user_id)
+  def perform(current_user_id, web=true)
     @current_user = User.find(current_user_id)
+    @origin = web ? ENV['ORIGIN_HEADER_MICROSOFT_GRAPH'] : ''
+ 
     refresh_token_if_invalid
     set_microsoft_azure_calendar_service
     update_user_calendars
@@ -35,7 +37,7 @@ class UpdateCalendarsEventsJob
 
         if event_item["attendees"].present?
           event_item["attendees"].each do |event_attendee|
-            @event_attendee = EventAttendee.where(event_id: @event.id, email: event_attendee["email"]).first  
+            @event_attendee = EventAttendee.where(event_id: @event.id, email: event_attendee["emailAddress"]["address"]).first  
 
             if @event_attendee.present?
               @event_attendee.update(event_attendee_params(event_attendee))
@@ -52,7 +54,7 @@ class UpdateCalendarsEventsJob
     @microsoft_service = MicrosoftService.new
 
     if !@microsoft_service.access_token_is_valid?(@current_user.azure_expire_token)
-      data_token = @microsoft_service.refresh_token(@current_user.azure_refresh_token, 'http://localhost:3000')
+      data_token = @microsoft_service.refresh_token(@current_user.azure_refresh_token, @origin)
       @current_user.update(azure_token: data_token["access_token"], azure_expire_token: Time.now + data_token['expires_in'])
     end
   end
@@ -103,7 +105,7 @@ class UpdateCalendarsEventsJob
   def event_attendee_params(event_attendee)
     {
       event: @event,
-      email: event_attendee["email"],
+      email: event_attendee["emailAddress"]["address"],
       response_status: event_attendee["status"]["response"]
     }
   end

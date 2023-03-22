@@ -1,0 +1,44 @@
+Events:
+
+allow_new_time_proposals: boolean (Microsoft)
+body:  text || body_content_type: string, body_content: string (Microsoft)
+categories: text (Microsoft)
+change_key: string (Microsoft)
+has_attachments: boolean (Microsoft)
+hide_attendees: boolean (Microsoft, Google)
+importance: string (Microsoft)
+is_all_day: boolean (Microsoft)
+is_cancelled: boolean (Microsoft)
+is_draft: boolean (Microsoft)
+is_online_meeting: boolean (Microsoft)
+is_organizer: boolean (Microsoft)
+is_reminder_on: boolean (Microsoft)
+locations: text (Microsoft)
+online_meeting: text (Microsoft)
+online_meeting_provider: text (Microsoft)
+online_meeting_url: string (Microsoft)
+original_start: datetime (Microsoft)
+original_start_time_zone: string (Microsoft)
+reminder_minutes_before_start: integer (Microsoft)
+response_status: text || response: string, time: datetime (Microsoft)
+series_master_id: string (Microsoft)
+show_as: string (Microsoft)
+transaction_id: string (Microsoft)
+type: string (Microsoft, Google)
+web_link: string (Microsoft, Google)  
+sensitivity: string (Microsoft, Google) 
+
+extended_properties: text (Google)
+hangout_link: string (Google)
+conference_data: text (Google)
+gadget: text (Google)
+anyone_can_add_self: boolean (Google),
+guests_can_invite_others: boolean (Google),
+guests_can_modify: boolean (Google),
+guests_can_see_other_guests: boolean (Google),
+private_copy: boolean (Google),
+locked: boolean (Google),
+source: text || source_url: string, source_title: string (Google)
+working_location_properties: text (Google)   
+attachments: text (Google) 
+ 
