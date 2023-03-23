@@ -19,6 +19,21 @@ class CreateCalendars < ActiveRecord::Migration[7.0]
       t.boolean :deleted
       t.boolean :hidden
       t.string :time_zone
+      t.text :notification_settings
+      t.string :location
+      t.boolean :can_edit
+      t.boolean :can_share
+      t.boolean :can_view_private_items
+      t.string :change_key
+      t.string :allowed_online_meeting_providers
+      t.string :web_link
+      t.string :default_online_meeting_provider
+      t.boolean :is_tallying_responses
+      t.boolean :is_default_calendar
+      t.boolean :is_removable
+      t.string :owner_name
+      t.string :owner_email
+      t.string :status
 
       t.timestamps
     end
