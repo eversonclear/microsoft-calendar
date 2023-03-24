@@ -13,6 +13,25 @@ class UpdateCalendarsEventsJob
     update_user_calendars
   end
 
+  def refresh_token_if_invalid
+    @microsoft_service = MicrosoftService.new
+
+    if !@microsoft_service.access_token_is_valid?(@current_user.azure_expire_token)
+      data_token = @microsoft_service.refresh_token(@current_user.azure_refresh_token, @origin)
+      @current_user.update(azure_token: data_token["access_token"], azure_expire_token: Time.now + data_token['expires_in'])
+    end
+  end
+
+  def set_microsoft_azure_calendar_service
+    callback =  Proc.new do |r|
+      r.headers['Authorization'] = "Bearer #{@current_user.azure_token}"
+      r.headers['Content-Type']  = 'application/json'
+      r.headers['X-AnchorMailbox'] = @current_user.email
+    end
+    
+    @graph_service = MicrosoftGraph.new(base_url: 'https://graph.microsoft.com/v1.0', cached_metadata_file: File.join(MicrosoftGraph::CACHED_METADATA_DIRECTORY, "metadata_v1.0.xml"), &callback).service
+  end
+
   def update_user_calendars
     calendars = @graph_service.get('me/calendars')
     
@@ -49,25 +68,6 @@ class UpdateCalendarsEventsJob
       end
     end
   end
-  
-  def refresh_token_if_invalid
-    @microsoft_service = MicrosoftService.new
-
-    if !@microsoft_service.access_token_is_valid?(@current_user.azure_expire_token)
-      data_token = @microsoft_service.refresh_token(@current_user.azure_refresh_token, @origin)
-      @current_user.update(azure_token: data_token["access_token"], azure_expire_token: Time.now + data_token['expires_in'])
-    end
-  end
-
-  def set_microsoft_azure_calendar_service
-    callback =  Proc.new do |r|
-      r.headers['Authorization'] = "Bearer #{@current_user.azure_token}"
-      r.headers['Content-Type']  = 'application/json'
-      r.headers['X-AnchorMailbox'] = @current_user.email
-    end
-    
-    @graph_service = MicrosoftGraph.new(base_url: 'https://graph.microsoft.com/v1.0', cached_metadata_file: File.join(MicrosoftGraph::CACHED_METADATA_DIRECTORY, "metadata_v1.0.xml"), &callback).service
-  end
 
   def calendar_params(calendar)
     {
@@ -77,6 +77,15 @@ class UpdateCalendarsEventsJob
       remote_id: calendar["id"],
       summary: calendar["name"],
       primary: calendar["isDefaultCalendar"],
+      change_key: calendar["changeKey"],
+      can_share: calendar["canShare"],
+      can_edit: calendar["canEdit"],
+      allowed_online_meeting_providers: calendar["allowedOnlineMeetingProviders"],
+      default_online_meeting_provider: calendar["defaultOnlineMeetingProvider"],
+      is_tallying_responses: calendar["isTallyingResponses"],
+      is_removable: calendar["isRemovable"],
+      owner_name: calendar["owner"]["name"],
+      owner_email: calendar["owner"]["address"]
     }
   end
 
@@ -95,10 +104,41 @@ class UpdateCalendarsEventsJob
       etag: event["@odata.etag"],
       i_cal_uid: event["iCalUId"],
       remote_id: event["id"],
+      categories: event["categories"],
       organizer_email: event["organizer"]["emailAddress"]["address"],
       self_organized: event["isOrganizer"],
       summary: event["subject"],
-      recurrences: event["recurrence"]
+      recurrence: event["recurrence"],
+      allow_new_time_proposals: event["allowNewTimeProposals"],
+      body_content: event["body"]["content"],
+      body_content_type: event["body"]["contentType"],
+      has_attachments: event["hasAttachments"],
+      attendees_omitted: event["hideAttendees"],
+      importance: event["importance"],
+      is_all_day: event["isAllDay"],
+      is_cancelled: event["isCancelled"],
+      is_draft: event["isDraft"],
+      is_online_meeting: event["isOnlineMeeting"],
+      is_organizer: event["isOrganizer"],
+      is_reminder_on: event["isReminderOn"],
+      locations: event["locations"],
+      online_meeting: event["onlineMeeting"],
+      online_meeting_provider: event["onlineMeetingProvider"],
+      online_meeting_url: event["onlineMeetingUrl"],
+      original_finishes_at_timezone: event["originalEndTimeZone"],
+      original_timezone_starts_at: event["originalStartTimeZone"],
+      original_starts_at: event["originalStart"],
+      reminder_minutes_before_start: event["reminderMinutesBeforeStart"],
+      response_requested: event["responseRequested"],
+      response_status_text: event["responseStatus"]["response"],
+      response_status_time: event["responseStatus"]["time"],
+      visibility: event["sensitivity"],
+      series_master_id: event["seriesMasterId"],
+      show_as: event["showAs"],
+      transaction_id: event["transactionId"],
+      event_type: event["type"],
+      web_link: event["webLink"],
+      change_key: event["changeKey"]
     }
   end
 
@@ -106,7 +146,10 @@ class UpdateCalendarsEventsJob
     {
       event: @event,
       email: event_attendee["emailAddress"]["address"],
-      response_status: event_attendee["status"]["response"]
+      display_name: event_attendee["emailAddress"]["name"],
+      response_status: event_attendee["status"]["response"],
+      response_status_time: event_attendee["status"]["time"],
+      type: event_attendee["time"],
     }
   end
 end

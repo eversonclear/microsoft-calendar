@@ -146,6 +146,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_03_23_190327) do
     t.string "source_title"
     t.text "working_location_properties"
     t.text "attachments"
+    t.string "original_finishes_at_timezone"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["calendar_id"], name: "index_events_on_calendar_id"

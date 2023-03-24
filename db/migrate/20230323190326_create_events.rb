@@ -74,6 +74,7 @@ class CreateEvents < ActiveRecord::Migration[7.0]
       t.string :source_title
       t.text :working_location_properties
       t.text :attachments
+      t.string :original_finishes_at_timezone
 
       t.timestamps
     end
