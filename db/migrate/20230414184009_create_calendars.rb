@@ -34,6 +34,7 @@ class CreateCalendars < ActiveRecord::Migration[7.0]
       t.string :owner_name
       t.string :owner_email
       t.string :status
+      t.boolean :should_sync, :default => false
 
       t.timestamps
     end

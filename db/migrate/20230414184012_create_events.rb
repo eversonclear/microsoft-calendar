@@ -2,7 +2,7 @@ class CreateEvents < ActiveRecord::Migration[7.0]
   def change
     create_table :events do |t|
       t.references :user, null: false, foreign_key: true
-      t.references :calendar, null: false, foreign_key: true
+      t.references :calendar, null: false, index: true, foreign_key: { on_delete: :cascade }
       t.datetime :remote_created_at
       t.datetime :remote_updated_at
       t.datetime :starts_at
@@ -47,8 +47,8 @@ class CreateEvents < ActiveRecord::Migration[7.0]
       t.boolean :is_reminder_on
       t.text :locations
       t.text :online_meeting
-      t.text :online_meeting_provider
-      t.text :online_meeting_url
+      t.string :online_meeting_provider
+      t.string :online_meeting_url
       t.datetime :original_starts_at
       t.string :original_timezone_starts_at
       t.integer :reminder_minutes_before_start
@@ -72,6 +72,7 @@ class CreateEvents < ActiveRecord::Migration[7.0]
       t.boolean :locked
       t.string :source_url
       t.string :source_title
+      t.string :color_id
       t.text :working_location_properties
       t.text :attachments
       t.string :original_finishes_at_timezone

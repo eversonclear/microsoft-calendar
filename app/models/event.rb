@@ -10,4 +10,5 @@ class Event < ApplicationRecord
   serialize :locations, JSON
 
   has_many :event_attendees
+  has_many :external_events
 end

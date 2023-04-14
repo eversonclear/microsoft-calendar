@@ -1,7 +1,7 @@
 require 'microsoft_graph'
 require 'net/http'
 
-class UpdateCalendarsEventsJob
+class PullUserMicrosoftCalendarsWorker
   include Sidekiq::Job
 
   def perform(current_user_id, web=true)

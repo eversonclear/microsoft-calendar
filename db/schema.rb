@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_03_23_190327) do
+ActiveRecord::Schema[7.0].define(version: 2023_04_14_184017) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -48,6 +48,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_03_23_190327) do
     t.string "owner_name"
     t.string "owner_email"
     t.string "status"
+    t.boolean "should_sync", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_calendars_on_user_id"
@@ -119,8 +120,8 @@ ActiveRecord::Schema[7.0].define(version: 2023_03_23_190327) do
     t.boolean "is_reminder_on"
     t.text "locations"
     t.text "online_meeting"
-    t.text "online_meeting_provider"
-    t.text "online_meeting_url"
+    t.string "online_meeting_provider"
+    t.string "online_meeting_url"
     t.datetime "original_starts_at"
     t.string "original_timezone_starts_at"
     t.integer "reminder_minutes_before_start"
@@ -144,6 +145,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_03_23_190327) do
     t.boolean "locked"
     t.string "source_url"
     t.string "source_title"
+    t.string "color_id"
     t.text "working_location_properties"
     t.text "attachments"
     t.string "original_finishes_at_timezone"
@@ -151,6 +153,16 @@ ActiveRecord::Schema[7.0].define(version: 2023_03_23_190327) do
     t.datetime "updated_at", null: false
     t.index ["calendar_id"], name: "index_events_on_calendar_id"
     t.index ["user_id"], name: "index_events_on_user_id"
+  end
+
+  create_table "external_events", force: :cascade do |t|
+    t.bigint "event_id", null: false
+    t.bigint "calendar_id", null: false
+    t.string "external_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["calendar_id"], name: "index_external_events_on_calendar_id"
+    t.index ["event_id"], name: "index_external_events_on_event_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -174,7 +186,9 @@ ActiveRecord::Schema[7.0].define(version: 2023_03_23_190327) do
   end
 
   add_foreign_key "calendars", "users"
-  add_foreign_key "event_attendees", "events"
-  add_foreign_key "events", "calendars"
+  add_foreign_key "event_attendees", "events", on_delete: :cascade
+  add_foreign_key "events", "calendars", on_delete: :cascade
   add_foreign_key "events", "users"
+  add_foreign_key "external_events", "calendars", on_delete: :cascade
+  add_foreign_key "external_events", "events", on_delete: :cascade
 end
