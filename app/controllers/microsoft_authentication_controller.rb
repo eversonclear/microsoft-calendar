@@ -11,6 +11,11 @@ class MicrosoftAuthenticationController < ApplicationController
     @current_user.update(azure_token: params[:azure_token], azure_expire_token: params[:azure_expire_token],
                          azure_refresh_token: params[:azure_refresh_token])
 
+    first_calendar = Calendar.where(user_id: @current_user.id).first
+
+    if first_calendar.blank?
+      Calendar.create!(user_id: @current_user.id, summary: 'Personal', kind: 'personal')
+    end
     render 'users/show'
   rescue Exception => e
     render json: { error: e.message }, status: :bad_request

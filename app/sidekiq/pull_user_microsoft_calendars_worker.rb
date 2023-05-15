@@ -49,9 +49,11 @@ class PullUserMicrosoftCalendarsWorker
       events[:attributes]["value"].map do |event_item|
         @event = Event.where(calendar_id: @calendar["id"], remote_id: event_item["id"]).first             
         if @event.present?
-          @event.update(event_params(event_item))
+          @event.update_columns(**event_params(event_item))
         else
-          @event = @calendar.events.create!(event_params(event_item))
+          row_id = @calendar.events.insert!(event_params(event_item))
+          @event = Event.find(row_id.first["id"])
+          @event.external_events.create(calendar_id: @calendar.id, external_id: @event.remote_id)
         end
 
         if event_item["attendees"].present?
@@ -71,7 +73,7 @@ class PullUserMicrosoftCalendarsWorker
 
   def calendar_params(calendar)
     {
-      user: @current_user,
+      user_id: @current_user.id,
       background_color: calendar["hexColor"],
       color_id: calendar["color"],
       remote_id: calendar["id"],
@@ -91,8 +93,8 @@ class PullUserMicrosoftCalendarsWorker
 
   def event_params(event)
     {
-      calendar: @calendar,
-      user: @current_user,
+      calendar_id: @calendar.id,
+      user_id: @current_user.id,
       location: event["location"]["displayName"] || '',
       description: event["bodyPreview"] || '',
       remote_created_at: event["createdDateTime"],
@@ -144,7 +146,7 @@ class PullUserMicrosoftCalendarsWorker
 
   def event_attendee_params(event_attendee)
     {
-      event: @event,
+      event_id: @event.id,
       email: event_attendee["emailAddress"]["address"],
       display_name: event_attendee["emailAddress"]["name"],
       response_status: event_attendee["status"]["response"],
